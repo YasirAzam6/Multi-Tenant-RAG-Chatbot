@@ -1,23 +1,26 @@
-import logging
 import os
-from core.config import config
+import logging
 
-# Vercel fix: Use /tmp directory which is the only writable folder in serverless
-LOG_DIR = os.getenv("LOG_DIR", "/tmp/logs")
-os.makedirs(LOG_DIR, exist_ok=True)
+# Check if running on Vercel production
+IS_VERCEL = os.environ.get("VERCEL") == "1"
 
 def setup_logging():
-    """
-    Configures application-wide logging.
-    Logs go to both console and a file in the /tmp directory.
-    """
-    level = logging.DEBUG if config.DEBUG else logging.INFO
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Clear existing handlers to prevent duplicate logs
+    logger.handlers = []
 
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(os.path.join(LOG_DIR, "app.log"))
-        ]
-    )
+    # Always add Console Handler
+    console_handler = logging.StreamHandler()
+    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    logger.addHandler(console_handler)
+
+    # Only create file logs if NOT on Vercel
+    if not IS_VERCEL:
+        LOG_DIR = "logs"
+        os.makedirs(LOG_DIR, exist_ok=True)
+        file_handler = logging.FileHandler(os.path.join(LOG_DIR, "app.log"))
+        file_handler.setFormatter(console_formatter)
+        logger.addHandler(file_handler)
