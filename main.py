@@ -13,22 +13,20 @@ if os.environ.get("VERCEL") == "1":
     os.environ["HF_HOME"] = "/tmp/huggingface"
     os.environ["TRANSFORMERS_CACHE"] = "/tmp/huggingface"
     os.makedirs("/tmp/huggingface", exist_ok=True)
+
+    # Disable multi-processing memory locks (Fixes Errno 16)
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # =========================================================================
 
 from core.tenant_manager import tenant_manager
-
 from core.logging_config import setup_logging
-
 from graph.rag_graph import build_graph
 from core.server import app 
 import uvicorn
 
-
-
 setup_logging()
 
 def run_cli():
-
     tenant = tenant_manager.load_tenant(tenant_id="tenant_1")
  
     print("Tenant Configuration:", tenant.config)
@@ -37,8 +35,7 @@ def run_cli():
 
     my_graph = build_graph()
     print("RAG Graph built successfully.")
-    # mermaid_code = my_graph.get_graph().draw_mermaid()
-    # print(mermaid_code)
+    
     while True:
         input_query = input("Enter your query (or 'exit' to quit): ")
         if input_query.lower() == 'exit':
@@ -64,6 +61,3 @@ if __name__ == "__main__":
             host="127.0.0.1",
             port=8000
         )
-
-# ****************************************************
-
