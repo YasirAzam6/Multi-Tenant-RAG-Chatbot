@@ -4,17 +4,19 @@ import os
 # VERCEL FIX: MUST BE AT THE ABSOLUTE TOP BEFORE ANY OTHER APP IMPORTS
 # =========================================================================
 if os.environ.get("VERCEL") == "1":
-    # Force tiktoken (OpenAI) to use the writable /tmp directory
     os.environ["TIKTOKEN_CACHE_DIR"] = "/tmp/tiktoken"
     os.makedirs("/tmp/tiktoken", exist_ok=True)
-    
-    # Force any underlying HuggingFace libraries to use /tmp
+
     os.environ["HF_HOME"] = "/tmp/huggingface"
     os.environ["TRANSFORMERS_CACHE"] = "/tmp/huggingface"
+    os.environ["SENTENCE_TRANSFORMERS_HOME"] = "/tmp/sentence_transformers"  # ADD THIS
+    os.environ["XDG_CACHE_HOME"] = "/tmp/xdg_cache"                          # ADD THIS
     os.makedirs("/tmp/huggingface", exist_ok=True)
+    os.makedirs("/tmp/sentence_transformers", exist_ok=True)
+    os.makedirs("/tmp/xdg_cache", exist_ok=True)
 
-    # Disable multi-processing memory locks (Fixes Errno 16)
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    os.environ["OMP_NUM_THREADS"] = "1"
 # =========================================================================
 
 from pathlib import Path

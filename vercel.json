@@ -1,10 +1,14 @@
 {
-  "functions": {
-    "server.py": {
-      "maxDuration": 60
-    },
-    "api/**/*.py": {
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "core/server.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "core/server.py"
+    }
+  ]
 }
